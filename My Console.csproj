@@ -92,7 +92,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

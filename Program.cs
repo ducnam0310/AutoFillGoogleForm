@@ -28,8 +28,7 @@ namespace My_Console
 
             var chromeUsers = Directory.GetDirectories(chromeUserDataPath)
                 .Select(fullName => fullName.Split('\\').Last())
-                .Where(folderName => Regex.IsMatch(folderName, "^Profile [1-9]{1,}$"))
-                .Where(p => p == "Profile 6" || p == "Profile 7");
+                .Where(folderName => Regex.IsMatch(folderName, "^Profile [1-9]{1,}$"));
 
 
             foreach (var chromeUser in chromeUsers)
@@ -56,12 +55,18 @@ namespace My_Console
 
                     var emailAddress = chromeDriver.FindElement(By.XPath(_emailXPath)).Text;
 
-                    for (var dataIndex = 0; dataIndex < data.Count(); dataIndex++)
+                    var currentData = data.SingleOrDefault(d => d.Last() == chromeUser);
+                    if (currentData == null)
                     {
-                        for (var xpathIndex = 0; xpathIndex < _xpaths.Count; xpathIndex++)
+                        continue;
+                    }
+
+                    for (var xpathIndex = 0; xpathIndex < _xpaths.Count - 1; xpathIndex++)
+                    {
+                        try
                         {
                             var xpath = _xpaths.ElementAt(xpathIndex);
-                            var fieldValue = data.ElementAt(dataIndex).ElementAt(xpathIndex);
+                            var fieldValue = currentData.ElementAt(xpathIndex);
                             if (fieldValue.ToLower().Equals("@email"))
                             {
                                 fieldValue = emailAddress;
@@ -69,10 +74,15 @@ namespace My_Console
 
                             chromeDriver.FindElement(By.XPath(xpath)).SendKeys(fieldValue);
                         }
+                        catch
+                        {
+                            continue;
+                        }
                     }
 
                     var btnSubmit = chromeDriver.FindElement(By.XPath(_submitBtnXPath));
                     btnSubmit.Click();
+                    await Task.Delay(TimeSpan.FromSeconds(3));
                 }
                 catch (Exception)
                 {
