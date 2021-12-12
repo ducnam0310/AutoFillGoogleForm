@@ -30,9 +30,15 @@ namespace My_Console
                 .Select(fullName => fullName.Split('\\').Last())
                 .Where(folderName => Regex.IsMatch(folderName, "^Profile [1-9]{1,}$"));
 
-
-            foreach (var chromeUser in chromeUsers)
+            foreach (var currentData in data)
             {
+                var chromeUser = chromeUsers.FirstOrDefault(user => user == currentData.Last());
+
+                if (string.IsNullOrEmpty(chromeUser))
+                {
+                    continue;
+                }
+
                 var chromeOptions = new ChromeOptions();
                 chromeOptions.AddArgument($"user-data-dir={chromeUserDataPath}");
                 chromeOptions.AddArgument($"profile-directory={chromeUser}");
@@ -54,12 +60,6 @@ namespace My_Console
                     //}
 
                     var emailAddress = chromeDriver.FindElement(By.XPath(_emailXPath)).Text;
-
-                    var currentData = data.SingleOrDefault(d => d.Last() == chromeUser);
-                    if (currentData == null)
-                    {
-                        continue;
-                    }
 
                     for (var xpathIndex = 0; xpathIndex < _xpaths.Count - 1; xpathIndex++)
                     {
